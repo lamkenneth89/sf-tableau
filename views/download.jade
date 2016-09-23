@@ -1,0 +1,20 @@
+doctype html
+html
+    head
+        meta(http-equiv="Cache-Control" content="no-store")
+        title= title
+        link(rel='stylesheet', href='/stylesheets/style.css')
+        link(rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css")
+        link(rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css")
+
+        script(src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js" type="text/javascript")
+        script(src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js")
+        script(src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js")
+        script(src="https://connectors.tableau.com/libs/tableauwdc-2.0.latest.js" type="text/javascript")
+        script(type='text/javascript', src='/javascripts/spredfast.js')
+    body
+        block content
+            h1= title
+            p Welcome to #{title}
+            a(href='#', title='Fetch Analytics', id='btn_fetch', class='btn btn-primary') Fetch Analytics Data
+            div#simulatorRoot

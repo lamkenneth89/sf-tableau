@@ -1,0 +1,9 @@
+extends layout.jade
+
+block content
+    div
+        h3 Reports available
+        ul
+            each value, index in reports
+                li
+                    a(href="/reports/download/"+value.name)= value.title
