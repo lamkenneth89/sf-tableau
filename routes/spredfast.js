@@ -3,7 +3,7 @@ var express = require("express");
 var router = express.Router();
 var Promise = require("bluebird");
 var Converter = require("csvtojson").Converter;
-var request = Promise.promisifyAll(require("request"));
+var request = Promise.promisifyAll(require("request"),{multiArgs: true});
 var config = require("../config.json");
 
 //Defaults for requests to the API.
@@ -28,7 +28,8 @@ var reports, report_status, report_body;
 //To get a list of all reports available for importing
 router.get("/list", function (req, res, next) {
     //Get a list of available reports
-    prepReport("/analytics/report")
+    options.uri = "/analytics/report";
+    request.getAsync(options)
         .then(function (a) {
             if (!a.error) {
                 reports = JSON.parse(a.body);
@@ -63,20 +64,28 @@ router.get("/retrieve/:report_name", function (req, res, next) {
     });
     if (req.params) {
         options.uri = "/analytics/report/" + req.params.report_name;
-        request.getAsync(options)
+        request.getAsync(options).spread(function (response, body) {
+            if (response.statusCode === 200)
+                return body;
+        })
             .then(function (results) {
-                report_status = JSON.parse(results.body);
+                report_status = JSON.parse(results);
                 if (report_status.status.succeeded) {
                     var report_id = report_status.data.id;
                     options.uri = "/analytics/report/" + req.params.report_name + "/instance/" + report_id;
                 }
             })
             .then(function (results) {
-                request.getAsync(options).then(function (report) {
+                request.getAsync(options)
+                    .spread(function (response, body) {
+                        if (response.statusCode === 200)
+                            return body;
+                    })
+                    .then(function (report) {
                     if (req.query.format && req.query.format === "csv") {
-                        res.send(report.body).end();
+                        res.send(report).end();
                     } else {
-                        converter.fromString(report.body);
+                        converter.fromString(report);
                     }
                 });
             })

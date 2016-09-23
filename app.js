@@ -46,21 +46,6 @@ app.use(function(req,res,next){
     } else {
       res.status(401).send("No valid configuration");
   }
-/*  if(req.session.jwt) {
-    console.log(req.session);
-    next();
-  } else {
-    if (process.env.sfJwt) {
-      req.session.jwt = process.env.sfJwt;
-    } else if(config.jwt) {
-      req.session.jwt = config.jwt;
-    } else {
-      console.log("No token :(");
-      // var err = new Error("No Valid Token");
-      // err.status = 401;
-      res.status(401).send("oops");
-    }
-  }*/
 });
 
 //Uncomment if you'd like to use the build in OAuth endpoints to retrieve your JWT.
