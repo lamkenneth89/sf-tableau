@@ -1,9 +1,8 @@
 "use strict";
 var express = require("express");
 var router = express.Router();
-var Promise = require("bluebird");
 var Converter = require("csvtojson").Converter;
-var request = Promise.promisifyAll(require("request"),{multiArgs: true});
+var rp = require("request-promise");
 var config = require("../config.json");
 
 //Defaults for requests to the API.
@@ -21,7 +20,7 @@ function prepReport(endpoint) {
         }
     };
     options.uri = endpoint;
-    return request.getAsync(options);
+    return rp.get(options);
 }
 var reports, report_status, report_body;
 
@@ -29,16 +28,18 @@ var reports, report_status, report_body;
 router.get("/list", function (req, res, next) {
     //Get a list of available reports
     options.uri = "/analytics/report";
-    request.getAsync(options)
-        .then(function (a) {
-            if (!a.error) {
-                reports = JSON.parse(a.body);
+    rp.get(options)
+        .then(function (rep) {
+            if (!rep.error) {
+                reports = JSON.parse(rep);
                 // res.status(a.statusCode).json(reports.data.reports);
                 res.render('report_list', {reports: reports.data.reports});
             } else {
-                res.send(a);
+                res.send(rep);
             }
-        });
+        }).catch(function(err){
+            console.log('Error fetching list of reports: ',err);
+    });
 });
 
 //This route loads the Tableau JS as well as spredfast.js and initiates the callbacks.
@@ -64,10 +65,7 @@ router.get("/retrieve/:report_name", function (req, res, next) {
     });
     if (req.params) {
         options.uri = "/analytics/report/" + req.params.report_name;
-        request.getAsync(options).spread(function (response, body) {
-            if (response.statusCode === 200)
-                return body;
-        })
+        rp.get(options)
             .then(function (results) {
                 report_status = JSON.parse(results);
                 if (report_status.status.succeeded) {
@@ -76,21 +74,24 @@ router.get("/retrieve/:report_name", function (req, res, next) {
                 }
             })
             .then(function (results) {
-                request.getAsync(options)
-                    .spread(function (response, body) {
-                        if (response.statusCode === 200)
-                            return body;
-                    })
-                    .then(function (report) {
-                    if (req.query.format && req.query.format === "csv") {
-                        res.send(report).end();
-                    } else {
-                        converter.fromString(report);
-                    }
-                });
+                setTimeout(function(){
+                    rp.get(options)
+                        .then(function (report) {
+                            if (req.query.format && req.query.format === "csv") {
+                                res.send(report).end();
+                            } else {
+                                converter.fromString(report);
+                            }
+                        })
+                        .catch(function(err){
+                            console.log("Error requesting report: ", err);
+                            res.send(err);
+                        });
+                },1000);
             })
             .catch(function (err) {
-                console.log("request failed: ", err);
+                console.log("Error requesting download: ", err);
+                res.send(err);
             });
     } else {
         res.status(400).end();

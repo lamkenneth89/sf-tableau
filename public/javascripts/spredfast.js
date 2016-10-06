@@ -352,25 +352,6 @@ var myConnector = tableau.makeConnector();
     };
 
     myConnector.getData = function (table, doneCallback) {
-/*        $.getJSON('http://localhost:3000'+tableau.connectionData, function (res) {
-            "use strict";
-            var audience = res,
-                tableData = [];
-
-            for (var i = 0; i < audience.length; i++) {
-                tableData.push({
-                    "Channel": audience[i].Channel,
-                    "Account": audience[i].Account,
-                    "ChannelAccountId": audience[i]["Channel Account ID"],
-                    "Date": audience[i].Metric,
-                    "AudienceSize": audience[i]["Audience Size"]
-                })
-            }
-
-            tableau.log("getData complete.");
-            table.appendRows(tableData);
-            doneCallback();
-        });*/
 
         var path = window.location.pathname.split('/');
         var schema = path[path.length -1];
@@ -402,39 +383,23 @@ var myConnector = tableau.makeConnector();
     };
 
     tableau.registerConnector(myConnector);
-})();
 
-$(document).ready(function () {
-/*    var path = window.location.pathname.split('/');
-    var schema = path[path.length -1];
-    var newURL = window.location.protocol + "//" + window.location.host + '/spredfast/report/retrieve/' + schema;
+    $(document).ready(function () {
 
-    $.ajax({url: newURL, dataType: 'json', accepts:{json:'application/json'}}).done(function (res) {
-        "use strict";
+        $("#btn_fetch").on("click", function (e) {
+            e.preventDefault();
 
-        tableau.connectionData = res;
-        tableau.connectionName = "Spredfast Analytics - " + window.location.pathname;
-        tableau.submit();
-    });*/
-    // tableau.connectionName = "Spredfast Analytics - " + window.location.pathname;
-    // tableau.submit();
-
-    $("a").click(function (e) {
-        e.preventDefault();
-
-        var path = window.location.pathname.split('/');
-        var schema = path[path.length -1];
-        var newURL = window.location.protocol + "//" + window.location.host + "/reports/retrieve/" + schema;
+            var path = window.location.pathname.split('/');
+            var schema = path[path.length -1];
+            var newURL = window.location.protocol + "//" + window.location.host + "/reports/retrieve/" + schema;
 
             tableau.connectionData = newURL;
             tableau.connectionName = "Spredfast Analytics - " + window.location.pathname;
             tableau.submit();
 
+            tableau.submit();
 
-        // tableau.connectionData = window.location.pathname;
-        // tableau.connectionName = "Spredfast Analytics - Audience";
-        // tableau.getData();
-        tableau.submit();
-
+        });
     });
-});
+
+})();

@@ -3,7 +3,7 @@ extends layout.jade
 block content
     div
         h3 Reports available
-        ul
+        ul#report_list
             each value, index in reports
                 li
                     a(href="/reports/download/"+value.name)= value.title
